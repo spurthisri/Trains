@@ -1,5 +1,10 @@
 package graph.modules;
 
+/*
+ * Edge class to represent Edge of the graph.
+ * Properties: originVertex, destinationVertex, weight of the Edge
+ * and pointer to nextEdge.
+ */
 public class Edge {
 	
 		//Starting town
