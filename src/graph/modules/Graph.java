@@ -2,7 +2,10 @@ package graph.modules;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
- 
+/*
+ * Graph class to represent Graph Routes and Graph Operations.
+ * Properties: routeTable or AdjacencyList
+ */
 public class Graph {
 	public Hashtable<Vertex, Edge> routeTable;
  

@@ -46,30 +46,43 @@ public class GraphMain {
 	}
 	
 		//Create route table (Adjacency List) from the given graph content.
+        //Considered creating Adjacency List as the input resulted in sparse matrix.
 		public static Hashtable<Vertex, Edge> CreateRouteTable(String fileContent){
 			String[] eachEdge = fileContent.trim().split(",");
-			Set<String> vertices = new HashSet<String>();
+			Set<String> vertices = new HashSet<String>(); //Variable to hold Vertices
 			Hashtable<Vertex, Edge> adjacencyList = new Hashtable<Vertex, Edge>();
 			
+			/*
+			 * For Each edge get the vertices and place them in the vertices Set.
+			 */
 			for(int i = 0; i<eachEdge.length; i++){
 				char[] charArray = eachEdge[i].trim().toCharArray();
 				for(int j = 0; j<charArray.length-1; j++){
 					vertices.add(String.valueOf(charArray[j]));
 				}				
 			}
-			
+			/*
+			 * Create vertex object for each vertex
+			 */
 			Vertex[] ver = new Vertex[30];
 			int inc = 0;
 			for(String s : vertices){
 				ver[inc++] = new Vertex(s);
 			}
+			
+			/*
+			 * For each edge, create Edge object and create routing table using vertices as keys and edges as values.
+			 * EX: For Edge AB3. Create origin Vertex A as in the AdjacencyList and place Edge AB3 as its value.
+			 * If we come across another edge starting with origin Vertex A, get the next property of previous edge (AB3)
+			 * and point that to the new edge. If origin is different and it is not present in keys already, create one
+			 * and repeat the steps.
+			 */
 			Edge[] edgeArray = new Edge[30];
 			String start, end;
 			int weight = 0, i = 0;
 			start = end = null;
 			for(String e : eachEdge){
-				char[] edgeSplit = e.trim().toCharArray();
-				
+				char[] edgeSplit = e.trim().toCharArray();				
 				start = String.valueOf(edgeSplit[0]);
 				end = String.valueOf(edgeSplit[1]);
 				weight = Integer.parseInt(String.valueOf(edgeSplit[2]));
@@ -175,7 +188,7 @@ public class GraphMain {
 				System.out.println(fileContent);
 				routeTable = CreateRouteTable(fileContent); //2) Create Route Table
 				Graph g = new Graph(routeTable); //3) Represent Graph using Route Table
-				System.out.println(routeTable.toString());
+				
 				System.out.println("*************FIND DISTANCE START*************");
 				//Enter the routes to check the weights in the format Ex: A-B-C
 				//Press enter once all the routes checking is finished.
@@ -183,18 +196,23 @@ public class GraphMain {
 				boolean cond = true;
 				while(cond){
 					String s = sc.nextLine();
-					String[] sArray = s.split("-");
+					
 					if(s.isEmpty()){
 						cond = false;
 						break;
 					}
-					ArrayList<Vertex> aList = new ArrayList<Vertex>();
-					for(String st : sArray){
-						aList.add(new Vertex(st));
+					if(Pattern.matches("([A-Za-z]-)+([A-Za-z])", s.trim())){
+						String[] sArray = s.trim().split("-");
+						ArrayList<Vertex> aList = new ArrayList<Vertex>();
+						for(String st : sArray){
+							aList.add(new Vertex(st));
+						}
+						int distance = DistanceBetween(g, aList);
+						System.out.println("Distance : " + distance);
 					}
-					int distance = DistanceBetween(g, aList);
-					System.out.println("Distance : " + distance);
-					
+					else{
+						System.out.println("Input not in correct format. Please enter routes as in Ex: A-B-C");
+					}
 				}
 				System.out.println("*************FIND DISTANCE END*************");
 				System.out.println("*************FIND ORIGIN TO DESTINATION WITH IN GIVEN NO OF STOPS START*************");
@@ -202,17 +220,22 @@ public class GraphMain {
 				cond = true;
 				while(cond){
 					String s = sc.nextLine();
-					String[] sArray = s.split("-");
 					if(s.isEmpty()){
 						cond = false;
 						break;
 					}
 					Vertex start,end;
-					start = new Vertex(sArray[0]);
-					end = new Vertex(sArray[1]);
-					int maxStops = Integer.parseInt(sArray[sArray.length-1]);
-					int withInStops = OriginToDestWithinStops(g, start, end, maxStops);
-					System.out.println("No.Of routes : " +withInStops);
+                    if(Pattern.matches("[A-Za-z]-[A-Za-z]-[0-9]", s.trim())){
+                    	String[] sArray = s.trim().split("-");
+                    	start = new Vertex(sArray[0]);
+                    	end = new Vertex(sArray[1]);
+                    	int maxStops = Integer.parseInt(sArray[sArray.length-1]);
+                    	int withInStops = OriginToDestWithinStops(g, start, end, maxStops);
+                    	System.out.println("No.Of routes : " +withInStops);
+                    }
+                    else{
+                        System.out.println("Input not in right format. Please enter data as in Ex: C-C-3");
+                    }
 				}
 				System.out.println("*************FIND ORIGIN TO DESTINATION WITH IN GIVEN NO OF STOPS END*************");
 				System.out.println("*************LENGTH OF SHORTEST ROUTE START*************");
@@ -220,16 +243,23 @@ public class GraphMain {
 				cond = true;
 				while(cond){
 					String s = sc.nextLine();
-					String[] sArray = s.split("-");
+					
 					if(s.isEmpty()){
 						cond = false;
 						break;
 					}
 					Vertex start, end;
-					start = new Vertex(sArray[0]);
-					end = new Vertex(sArray[1]);
-					int shortRoute = ShortRouteFromOriginToDest(g, start, end);
-					System.out.println("Shortest Route between " +start +" and "+end+ " is "+shortRoute);
+					if(Pattern.matches("[A-Za-z]-[A-Za-z]", s.trim())){
+						String[] sArray = s.trim().split("-");
+						start = new Vertex(sArray[0]);
+						end = new Vertex(sArray[1]);
+						int shortRoute = ShortRouteFromOriginToDest(g, start, end);
+						System.out.println("Shortest Route between " +start +" and "+end+ " is "+shortRoute);
+					}
+					else{
+						System.out.println("Input not in expected format. Please enter data as in Ex: A-B");
+					}
+					
 				}
 				System.out.println("*************LENGTH OF SHORTEST ROUTE END*************");
 				System.out.println("*************NUMBER OF DIFFERENT ROUTES START*************");
@@ -237,18 +267,24 @@ public class GraphMain {
 				cond = true;
 				while(cond){
 					String s = sc.nextLine();
-					String[] sArray = s.split("-");
+					
 					if(s.isEmpty()){
 						cond = false;
 						break;
 					}
 					Vertex start,end;
 					int maxDistance;
-					start = new Vertex(sArray[0]);
-					end = new Vertex(sArray[1]);
-					maxDistance = Integer.parseInt(sArray[2]);
-					int diffRoutes = NumRoutesWithin(g,start,end,maxDistance);
-					System.out.println("Number of different routes between "+start+" and "+end+" with distance less than "+maxDistance+ " is "+diffRoutes);
+					if(Pattern.matches("[A-Za-z]-[A-Za-z]-[0-9]+", s.trim())){
+						String[] sArray = s.trim().split("-");
+						start = new Vertex(sArray[0]);
+						end = new Vertex(sArray[1]);
+						maxDistance = Integer.parseInt(sArray[2]);
+						int diffRoutes = NumRoutesWithin(g,start,end,maxDistance);
+						System.out.println("Number of different routes between "+start+" and "+end+" with distance less than "+maxDistance+ " is "+diffRoutes);
+					}
+					else{
+						System.out.println("Input not in expected format. Please enter input as in Ex:A-C-30.");
+					}
 				}
 				System.out.println("*************NUMBER OF DIFFERENT ROUTES END*************");
 			}

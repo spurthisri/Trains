@@ -1,5 +1,9 @@
 package graph.modules;
 
+/*
+ * Vertex class to represent vertex of the graph.
+ * Properties: name and visited.
+ */
 public class Vertex {
 
 	public String name;
